@@ -16,11 +16,13 @@ float accAngle;
 
 void setup() {
   Serial.begin(9600);
-  //mpu = new GY521();
-  //bool status = mpu.begin();
-  //Serial.println(status);
-
   Wire.begin();
+  delay(100);
+  while(mpu.wakeup() == false) {
+    Serial.print(millis());
+    Serial.println("\tConnection to GY521 failed");
+    delay(1000);
+  }
 
   mpu.setAccelSensitivity(1); //set to 4g
   mpu.setGyroSensitivity(1); //set to 500dps
