@@ -220,9 +220,13 @@ void computePID() {
   
 }
 
+/*
+* Function for controlling the left and right motor
+* positive speeds mean forward, negative mean backward rotation
+*
+*/
 void setMotors(float leftSpeed, float rightSpeed){
   //diff between the directions
-  //negative speeds mean backwards
   if(leftSpeed >=0) {
     leftStep.setSpeed(leftSpeed);
 
@@ -238,6 +242,7 @@ void setMotors(float leftSpeed, float rightSpeed){
     rightStep.setSpeed(rightSpeed);
   }
 
+  //run at new set speed
   leftStep.runSpeed();
   rightStep.runSpeed();
 }
