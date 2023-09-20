@@ -5,6 +5,11 @@
 *
 * The wiring of the lower button panel is taken from the fritzing sketches.
 *
+* Expected behaviour: 
+* When Green BTN is pressed, Green LED should light up and print to Serial accordingly
+* When Red BTN is pressed,   Red LED should light up   and print to Serial accordingly
+* 
+*
 */
 
 #define RED_LED_PIN 9
