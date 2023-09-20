@@ -7,11 +7,11 @@
 *
 */
 
-#define RED_LED_PIN 2
-#define GRN_LED_PIN 3
+#define RED_LED_PIN 12
+#define GRN_LED_PIN 11
 
-#define RED_BTN_PIN 4
-#define GRN_BTN_PIN 5
+#define RED_BTN_PIN 10
+#define GRN_BTN_PIN 9
 
 
 void setup() {
@@ -20,6 +20,8 @@ void setup() {
   
   pinMode(RED_BTN_PIN, INPUT);
   pinMode(GRN_BTN_PIN, INPUT);
+
+  Serial.begin(9600);
 
 }
 
@@ -30,12 +32,14 @@ void loop() {
   //we read LOWs as we use pull-ups
   if(red == LOW){
     digitalWrite(RED_LED_PIN, HIGH);
+    Serial.println("RED PRESSED");
   } else {
     digitalWrite(RED_LED_PIN, LOW);
   }
 
     if(green == LOW){
     digitalWrite(GRN_LED_PIN, HIGH);
+    Serial.println("GREEN PRESSED");
   } else {
     digitalWrite(GRN_LED_PIN, LOW);
   }
