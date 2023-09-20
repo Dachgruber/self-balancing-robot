@@ -7,11 +7,11 @@
 *
 */
 
-#define RED_LED_PIN 12
-#define GRN_LED_PIN 11
+#define RED_LED_PIN 9
+#define GRN_LED_PIN 10
 
-#define RED_BTN_PIN 10
-#define GRN_BTN_PIN 9
+#define RED_BTN_PIN 11
+#define GRN_BTN_PIN 12
 
 
 void setup() {
