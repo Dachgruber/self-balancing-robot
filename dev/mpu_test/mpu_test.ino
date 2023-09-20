@@ -4,7 +4,7 @@
 * and read out the x and y accel values. Going from these it will compute
 * the current angle and print it to Serial.
 *
-* Note: This requires the GY521 lib to be installed
+* Note: This requires the GY521-lib from the repository to be installed
 *
 *
 *
@@ -12,7 +12,8 @@
 #include "GY521.h"
 #include "math.h"
 
-GY521 mpu;
+//we change the default address as the AD0 pin isnt connected to anything
+GY521 mpu(0x68);
 
 float accY, accZ;
 float accAngle;
@@ -21,7 +22,7 @@ float accAngle;
 
 void setup() {
   Serial.begin(9600);
-  Wire.begin(0x68);
+  Wire.begin();
   delay(100);
   while(mpu.wakeup() == false) {
     Serial.print(millis());
