@@ -25,15 +25,20 @@ const int maxSpeedLimit = 2000.0;
 void setup() {
   step1.setMaxSpeed(maxSpeedLimit);
   step2.setMaxSpeed(maxSpeedLimit);
+  
+  step1.setSpeed(100);
+  step2.setSpeed(100);
+
+  //step1.runSpeed();
+  //step2.runSpeed();
+
 }
 
 void loop() {
   
-
-  step1.setSpeed(maxSpeedLimit/5.0);
-  step2.setSpeed(maxSpeedLimit/5.0);
+    
   step1.runSpeed();
-  //step2.runSpeed();
+  step2.runSpeed();
   //delay(2000);
   
 
