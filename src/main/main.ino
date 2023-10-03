@@ -238,26 +238,29 @@ void computePID() {
 void setMotors(float leftSpeed, float rightSpeed){
 
   //map the speed values to a more useful range
-  float leftmSpeed = map(leftSpeed, -255, 255, -50, 50);
-  //float rightmSpeed = map(rightSpeed, -255, 255, -50, 50);
-  float rightmSpeed = 1;
+  float leftmSpeed = map(leftSpeed, -255, 255, -512, 512);
+  float rightmSpeed = map(rightSpeed, -255, 255, -512, 512);
+  
 
+
+    leftStep.setSpeed(leftmSpeed);
+    rightStep.setSpeed(- rightmSpeed);
 
   //diff between the directions
-  if(leftSpeed <=0) {
-    leftStep.setSpeed(leftmSpeed);
+  //if(leftSpeed <=0) {
+  //  leftStep.setSpeed(leftmSpeed);
 
-  } else {
-   leftStep.setSpeed(-leftmSpeed);
-  }
+  //} else {
+  // leftStep.setSpeed(-leftmSpeed);
+  //}
 
   //inverse the speeds at the second motor,
   //as its mounted mirrored
-  if(rightSpeed <=0){
-    rightStep.setSpeed(-rightmSpeed);
-  } else {
-    rightStep.setSpeed(rightmSpeed);
-  }
+  //if(rightSpeed <=0){
+  //  rightStep.setSpeed(-rightmSpeed);
+  //} else {
+  //  rightStep.setSpeed(rightmSpeed);
+  //}
 
   //run at new set speed
   leftStep.runSpeed();
