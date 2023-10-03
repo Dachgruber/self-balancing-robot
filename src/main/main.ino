@@ -8,16 +8,19 @@
 #include "GY521.h"
 #include "math.h" 
 #include <AccelStepper.h>
+//#include <Stepper.h>
 
 //math constants
 #define earthConst 9.81
 
+const bool DEBUG = false;
+
 //---------------------------------------------stepper setup----------------------------------------------
 //two motor driver boards on two set of pins
-#define dirPin1 2
-#define stepPin1 3
-#define dirPin2 4
-#define stepPin2 5
+#define dirPin1 3
+#define stepPin1 4
+#define dirPin2 6
+#define stepPin2 7
 
 //these depend on the used stepper motor. Use with care
 const int stepsPerRevolution = 200;
@@ -27,6 +30,8 @@ const int maxSpeedLimit = 2000.0;
 //stepper Objects used in the code
 AccelStepper rightStep(AccelStepper::DRIVER,stepPin1,dirPin1);
 AccelStepper leftStep(AccelStepper::DRIVER,stepPin2,dirPin2);  
+
+
 
 //working var that specifies the current motorPower
 volatile int motorPower;
@@ -44,7 +49,8 @@ volatile float gyroAngle = 0;
 volatile float angleX, angleY, angleZ;
 
 //mpu object used in the code
-GY521 mpu;
+//0x68 address as AD0 Pin is not connected atm
+GY521 mpu(0x68);
 
 //-----------------------------------------------PID setup----------------------------------------------
 //three dabloons for the three parameters of the P I D
@@ -107,6 +113,7 @@ void setup() {
   //initPID();
 
   Serial.println("SETUP COMPLETED");
+
 }
 
 
@@ -134,8 +141,10 @@ void loop() {
   //and set motorpower
   motorPower = constrain(motorPower,-255,255); //constrain damit die Stepper nicht platzen
   
-  //some debug print
-  Serial.println(motorPower);
+  //some debug print, this will slow down the motor significantly!
+  if(DEBUG){
+    Serial.println(motorPower);
+  }
   setMotors(motorPower, motorPower);
 
   //Slowing things down to prevent overflowing debug out
@@ -245,4 +254,5 @@ void setMotors(float leftSpeed, float rightSpeed){
   //run at new set speed
   leftStep.runSpeed();
   rightStep.runSpeed();
+
 }
