@@ -29,8 +29,8 @@ const int stepTime = 1;
 const int maxSpeedLimit = 2000.0;
 
 //stepper Objects used in the code
-AccelStepper rightStep(AccelStepper::DRIVER,stepPin1,dirPin1);
-AccelStepper leftStep(AccelStepper::DRIVER,stepPin2,dirPin2);  
+AccelStepper rightStep(AccelStepper::DRIVER,stepPin2,dirPin2);
+AccelStepper leftStep(AccelStepper::DRIVER,stepPin1,dirPin1);  
 
 
 
@@ -236,20 +236,27 @@ void computePID() {
 *
 */
 void setMotors(float leftSpeed, float rightSpeed){
+
+  //map the speed values to a more useful range
+  float leftmSpeed = map(leftSpeed, -255, 255, -50, 50);
+  //float rightmSpeed = map(rightSpeed, -255, 255, -50, 50);
+  float rightmSpeed = 1;
+
+
   //diff between the directions
   if(leftSpeed <=0) {
-    leftStep.setSpeed(leftSpeed);
+    leftStep.setSpeed(leftmSpeed);
 
   } else {
-   leftStep.setSpeed(-leftSpeed);
+   leftStep.setSpeed(-leftmSpeed);
   }
 
   //inverse the speeds at the second motor,
   //as its mounted mirrored
   if(rightSpeed <=0){
-    rightStep.setSpeed(-rightSpeed);
+    rightStep.setSpeed(-rightmSpeed);
   } else {
-    rightStep.setSpeed(rightSpeed);
+    rightStep.setSpeed(rightmSpeed);
   }
 
   //run at new set speed
