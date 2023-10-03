@@ -13,7 +13,8 @@
 //math constants
 #define earthConst 9.81
 
-const bool DEBUG = false;
+
+const bool DEBUG = true;
 
 //---------------------------------------------stepper setup----------------------------------------------
 //two motor driver boards on two set of pins
@@ -236,7 +237,7 @@ void computePID() {
 */
 void setMotors(float leftSpeed, float rightSpeed){
   //diff between the directions
-  if(leftSpeed >=0) {
+  if(leftSpeed <=0) {
     leftStep.setSpeed(leftSpeed);
 
   } else {
@@ -245,7 +246,7 @@ void setMotors(float leftSpeed, float rightSpeed){
 
   //inverse the speeds at the second motor,
   //as its mounted mirrored
-  if(rightSpeed >=0){
+  if(rightSpeed <=0){
     rightStep.setSpeed(-rightSpeed);
   } else {
     rightStep.setSpeed(rightSpeed);
