@@ -26,8 +26,8 @@ void setup() {
   step1.setMaxSpeed(maxSpeedLimit);
   step2.setMaxSpeed(maxSpeedLimit);
   
-  step1.setSpeed(100);
-  step2.setSpeed(100);
+  step1.setSpeed(1600);
+  step2.setSpeed(1600);
 
   //step1.runSpeed();
   //step2.runSpeed();
