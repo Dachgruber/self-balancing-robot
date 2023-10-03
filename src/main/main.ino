@@ -14,7 +14,7 @@
 #define earthConst 9.81
 
 
-const bool DEBUG = true;
+const bool DEBUG = false;
 
 //---------------------------------------------stepper setup----------------------------------------------
 //two motor driver boards on two set of pins
@@ -24,9 +24,9 @@ const bool DEBUG = true;
 #define stepPin2 7
 
 //these depend on the used stepper motor. Use with care
-const int stepsPerRevolution = 200;
-const int stepTime = 1;
-const int maxSpeedLimit = 2000.0;
+//const int stepsPerRevolution = 200;
+//const int stepTime = 1;
+const int maxSpeedLimit = 2000.0 * 16;
 
 //stepper Objects used in the code
 AccelStepper rightStep(AccelStepper::DRIVER,stepPin2,dirPin2);
@@ -55,9 +55,9 @@ GY521 mpu(0x68);
 
 //-----------------------------------------------PID setup----------------------------------------------
 //three dabloons for the three parameters of the P I D
-float KP = 40;
-float KI = 0;//40;
-float KD = 0;// 0.05;
+float KP = 10;
+float KI = 40;//40;
+float KD = 0.05;// 0.05;
 
 //error working vars for the PID algorithm
 volatile float error, prevError = 0, errorSum = 0;
@@ -79,8 +79,8 @@ float currentAngle, previousAngle;
 void setup() {
 
   //because we do not want to explode the steppies
-  rightStep.setMaxSpeed(maxSpeedLimit);
-  leftStep.setMaxSpeed(maxSpeedLimit);
+  rightStep.setMaxSpeed((float)maxSpeedLimit);
+  leftStep.setMaxSpeed((float)maxSpeedLimit);
 
   Serial.begin(9600);
   Wire.begin();
@@ -110,8 +110,8 @@ void setup() {
 
   //mpu.setThrottle();
 
-  //enable the PID timer routine
-  //initPID();
+  //enable the ISR timer routine
+  initPID();
 
   Serial.println("SETUP COMPLETED");
 
@@ -140,7 +140,7 @@ void loop() {
   computePID();
 
   //and set motorpower
-  motorPower = constrain(motorPower,-255,255); //constrain damit die Stepper nicht platzen
+  motorPower = constrain(motorPower,-255*16,255*16); //constrain damit die Stepper nicht platzen
   
   //some debug print, this will slow down the motor significantly!
   if(DEBUG){
@@ -157,18 +157,23 @@ void loop() {
 * LINK: https://www.instructables.com/Arduino-Self-Balancing-Robot-1/
 * 
 * This enables the internal Timer1 to wake up the PID routine every 5ms
+
+*  Calculations (for 500ms): 
+*  System clock 16 Mhz and Prescalar 256;
+*  Timer 1 speed = 16Mhz/256 = 62.5 Khz    
+*  Pulse time = 1/62.5 Khz =  16us  
+*  Count up to = 500ms / 16us = 31250 (so this is the value the OCR register should have)  
 */
 void initPID(){
   cli(); // disable global interrupts
-  TCCR1A = 0; //set entire TCCR1A register to 0
+  TCCR1A = 0; //set entire TCCR1A register to 0, resetting the timer value
   TCCR1B = 0; //same for TCCR1B
 
   //set compare match register to set sample time 5ms
-  OCR1A = 9999;
-  //turn on CTC mode
-  TCCR1B |= (1 << WGM12);
-  //Set CS11 bit for prescaling by 8
-  TCCR1B |= (1 << CS11);
+  OCR1A = 100;
+  //prescale: will divide the clock signal with 8, slightly slowing down our timer
+  //TCCR1B |= (1 << CS11);
+  TCCR1B |= B00000010;
   // enable timer compare interrupt
   TIMSK1 |= (1 << OCIE1A);
   sei(); //enable glonbal interrupts
@@ -176,9 +181,15 @@ void initPID(){
 } 
 
 
-/*the ISR will be called every 5ms
-* ISR(TIMER1_COMPA_vect) {
-*
+//the ISR will be called every 5ms
+ISR(TIMER1_COMPA_vect) {
+  TCNT1  = 0; //reset the timer 
+  //Serial.print("ISR ");
+  leftStep.runSpeed();
+  rightStep.runSpeed();
+
+}
+/*
 * we currently do not depend on the ISR but instead call the PID function from the main loop func
 * this is basically a makeshift PID-Controller
 * This controller will do the following steps:
@@ -238,29 +249,18 @@ void computePID() {
 void setMotors(float leftSpeed, float rightSpeed){
 
   //map the speed values to a more useful range
-  float leftmSpeed = map(leftSpeed, -255, 255, -512, 512);
-  float rightmSpeed = map(rightSpeed, -255, 255, -512, 512);
-  
+  const int RANGE = 255*16;
+  float leftmSpeed = map(leftSpeed, -255, 255, -RANGE, RANGE);
+  float rightmSpeed = map(rightSpeed, -255, 255, -RANGE, RANGE);
 
-
-    leftStep.setSpeed(leftmSpeed);
-    rightStep.setSpeed(- rightmSpeed);
-
-  //diff between the directions
-  //if(leftSpeed <=0) {
-  //  leftStep.setSpeed(leftmSpeed);
-
-  //} else {
-  // leftStep.setSpeed(-leftmSpeed);
-  //}
+  Serial.println(leftmSpeed);
 
   //inverse the speeds at the second motor,
   //as its mounted mirrored
-  //if(rightSpeed <=0){
-  //  rightStep.setSpeed(-rightmSpeed);
-  //} else {
-  //  rightStep.setSpeed(rightmSpeed);
-  //}
+  leftStep.setSpeed(leftmSpeed);
+  rightStep.setSpeed(- rightmSpeed);
+  //leftStep.setSpeed(4000.00);
+  //rightStep.setSpeed(4000.00)
 
   //run at new set speed
   leftStep.runSpeed();
