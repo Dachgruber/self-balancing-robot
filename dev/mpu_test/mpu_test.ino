@@ -1,8 +1,11 @@
 /* Test programm for the GY-521 MPU Breakout Board
 *  
 * This programm will automatically find the GY521 board on the I2C bus 
-* and read out the x and y accel values. Going from these it will compute
-* the current angle and print it to Serial.
+* and read out the x and y accel values as well as the x angle computed by the lib. 
+* Going from these it will compute the current angle using the accel values and 
+* print either the accAngle or the lib angle to Serial.
+*
+* 
 *
 * Note: This requires the GY521-lib from the repository to be installed
 *
@@ -15,7 +18,7 @@
 //we change the default address as the AD0 pin isnt connected to anything
 GY521 mpu(0x68);
 
-float accY, accZ;
+float accY, accZ, angleX;
 float accAngle;
 
 
@@ -40,13 +43,16 @@ void loop() {
   //then, disect them into their components
   accZ = mpu.getAccelZ();
   accY = mpu.getAccelY();
+  
+  angleX = mpu.getAngleX();
 
   accAngle = atan2(accY, accZ)*RAD_TO_DEG;
   
   //NaN check
   if(isnan(accAngle));
   else
-    Serial.println(accAngle);
+    //Serial.println(accAngle);
 
-  delay(1000);
+  Serial.println(accAngle);
+  //delay(1000);
 }
