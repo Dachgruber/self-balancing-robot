@@ -13,8 +13,18 @@
 //math constants
 #define earthConst 9.81
 
+//-----------------------------------------------Pins----------------------------------------------------
 
-const bool DEBUG = false;
+//two motor driver boards on two set of pins
+#define dirPin1 3
+#define stepPin1 4
+#define dirPin2 6
+#define stepPin2 7
+
+#define potiPin A0
+
+
+const bool DEBUG = true;
 //#########################################CONFIG/TUNING ZONE###############################################
 
 // params for the steppies
@@ -28,7 +38,7 @@ float KD = 0; //(D)erivative Tuning Parameter
 
 //this is the angle in degrees the robot should be standing at, measured perpendicular to ground.
 //the bias is used to include the balancing point of the robot frame (determine this using the mpu test) 
-float angleBias = -6;
+float angleBias = -3.8;
 float targetAngle = 0 + angleBias;
 
 
@@ -36,20 +46,11 @@ float targetAngle = 0 + angleBias;
 
 
 //---------------------------------------------stepper setup----------------------------------------------
-//two motor driver boards on two set of pins
-#define dirPin1 3
-#define stepPin1 4
-#define dirPin2 6
-#define stepPin2 7
-
 // specs of the used stepper motor.
 // if these differ from the setup, change to the stepper code is needed
 // stepsPerRevolution = 200;
-// stepTime = 1/16;
+// stepTime = 1/8;
 
-// tune these in the Config Zone (tm)
-// maxSpeedLimit = 8000.00;
-// speedRange = 255*16;
 
 //stepper Objects used in the code
 AccelStepper rightStep(AccelStepper::DRIVER,stepPin2,dirPin2);
@@ -143,8 +144,33 @@ void setup() {
 
 }
 
+/*
+* util function that works like map, but for floats instead of integers
+*/
+float floatMap(float x, float in_min, float in_max, float out_min, float out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+/*
+* Reads the onboard potentiometer and maps the analog value
+* to a float between minV and maxV
+*
+*/
+float readPoti(int minV, int maxV) {
+  int analogValue = analogRead(potiPin);
+  int finValue = floatMap(analogValue, 0, 1023, minV, maxV);
+  
+  if (DEBUG) {
+    Serial.print("Value: "); Serial.print(finValue); Serial.print(" "); 
+  }
+
+  return finValue;
+}
+
 
 void loop() {
+
+  KP = readPoti(0,100);
 
   mpu.read(); //get new, fresh values
   
@@ -166,11 +192,8 @@ void loop() {
 
   computePID();
   
-
-
-  //some debug print, this will slow down the motor significantly!
   if(DEBUG){
-    Serial.println(motorPower);
+    //Serial.println(motorPower);
   }
   setMotors(motorPower, motorPower);
 
@@ -277,15 +300,10 @@ void computePID() {
 */
 void setMotors(float leftDistance, float rightDistance){
   
-  Serial.println(leftDistance);
+  if(DEBUG) {
+    Serial.println(leftDistance);
+  }
   leftStep.move(leftDistance);
   rightStep.move(-rightDistance);
 
-}
-
-/*
-* util function that works like map, but for floats instead of integers
-*/
-float floatMap(float x, float in_min, float in_max, float out_min, float out_max) {
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
