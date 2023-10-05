@@ -15,6 +15,25 @@
 
 
 const bool DEBUG = false;
+//#########################################CONFIG/TUNING ZONE###############################################
+
+// params for the steppies
+const float maxSpeedLimit = 360 * 4;
+const float maxAccelLimit = 6000;
+
+// three dabloons for the three parameters of the P I D
+float KP = 10;   //(P)roportional Tuning Parameter
+float KI = 0;   //(I)ntegral Tuning Parameter 
+float KD = 0; //(D)erivative Tuning Parameter
+
+//this is the angle in degrees the robot should be standing at, measured perpendicular to ground.
+//the bias is used to include the balancing point of the robot frame (determine this using the mpu test) 
+float angleBias = -6;
+float targetAngle = 0 + angleBias;
+
+
+//##########################################################################################################
+
 
 //---------------------------------------------stepper setup----------------------------------------------
 //two motor driver boards on two set of pins
@@ -23,15 +42,18 @@ const bool DEBUG = false;
 #define dirPin2 6
 #define stepPin2 7
 
-//these depend on the used stepper motor. Use with care
-//const int stepsPerRevolution = 200;
-//const int stepTime = 1;
-const int maxSpeedLimit = 2000.0 * 16;
+// specs of the used stepper motor.
+// if these differ from the setup, change to the stepper code is needed
+// stepsPerRevolution = 200;
+// stepTime = 1/16;
+
+// tune these in the Config Zone (tm)
+// maxSpeedLimit = 8000.00;
+// speedRange = 255*16;
 
 //stepper Objects used in the code
 AccelStepper rightStep(AccelStepper::DRIVER,stepPin2,dirPin2);
 AccelStepper leftStep(AccelStepper::DRIVER,stepPin1,dirPin1);  
-
 
 
 //working var that specifies the current motorPower
@@ -54,10 +76,7 @@ volatile float angleX, angleY, angleZ;
 GY521 mpu(0x68);
 
 //-----------------------------------------------PID setup----------------------------------------------
-//three dabloons for the three parameters of the P I D
-float KP = 10;
-float KI = 40;//40;
-float KD = 0.05;// 0.05;
+//find KI,KP and KP in the Config Zone (tm)
 
 //error working vars for the PID algorithm
 volatile float error, prevError = 0, errorSum = 0;
@@ -66,8 +85,7 @@ volatile float error, prevError = 0, errorSum = 0;
 unsigned long currTime, prevTime = 0, loopTime;
 float sampleTime = 0.005;
 
-//this is the angle the robot should be standing at, measured perpendicular to ground. 0 for upright, +20 for 20 deg to the front etc
-float targetAngle = 0;
+//find the desired angle in the Config Zone (tm)
 
 //values used for the complimentary filter
 float time = 0.9;
@@ -81,6 +99,14 @@ void setup() {
   //because we do not want to explode the steppies
   rightStep.setMaxSpeed((float)maxSpeedLimit);
   leftStep.setMaxSpeed((float)maxSpeedLimit);
+
+  //init the current Position
+  leftStep.setCurrentPosition(0);
+  rightStep.setCurrentPosition(0);
+
+  //and determine the acceleration constant
+  leftStep.setAcceleration(maxAccelLimit);
+  rightStep.setAcceleration(maxAccelLimit);
 
   Serial.begin(9600);
   Wire.begin();
@@ -111,7 +137,7 @@ void setup() {
   //mpu.setThrottle();
 
   //enable the ISR timer routine
-  initPID();
+  initISR();
 
   Serial.println("SETUP COMPLETED");
 
@@ -137,11 +163,11 @@ void loop() {
   //Serial.print(angleX); Serial.print(" "); Serial.print(angleY); Serial.print(" "); Serial.print(angleZ); Serial.println(" ");
 
   //compute the needed motorpower using the PID
-  computePID();
 
-  //and set motorpower
-  motorPower = constrain(motorPower,-255*16,255*16); //constrain damit die Stepper nicht platzen
+  computePID();
   
+
+
   //some debug print, this will slow down the motor significantly!
   if(DEBUG){
     Serial.println(motorPower);
@@ -164,7 +190,7 @@ void loop() {
 *  Pulse time = 1/62.5 Khz =  16us  
 *  Count up to = 500ms / 16us = 31250 (so this is the value the OCR register should have)  
 */
-void initPID(){
+void initISR(){
   cli(); // disable global interrupts
   TCCR1A = 0; //set entire TCCR1A register to 0, resetting the timer value
   TCCR1B = 0; //same for TCCR1B
@@ -184,9 +210,10 @@ void initPID(){
 //the ISR will be called every 5ms
 ISR(TIMER1_COMPA_vect) {
   TCNT1  = 0; //reset the timer 
-  //Serial.print("ISR ");
-  leftStep.runSpeed();
-  rightStep.runSpeed();
+  // calling run() instead of runSpeed() tells the stepper to
+  // accelerate to maxSpeed instead of using constant Speed
+  leftStep.run();
+  rightStep.run();
 
 }
 /*
@@ -231,7 +258,8 @@ void computePID() {
 
   /*4. finally, PID magic*/
   //calculate output from P, I and D values
-  motorPower = KP * (error)+ KI * (errorSum)*sampleTime - KD * (currentAngle-previousAngle)/sampleTime ;
+  float output = KP * (error)+ KI * (errorSum)*sampleTime - KD * (currentAngle-previousAngle)/sampleTime ;
+  motorPower = constrain(output, -360, 360); //a circle has 360 degrees, so constrain to one circle in each direction
   previousAngle = currentAngle; //save for next time
 
   //some debug outprint
@@ -242,28 +270,22 @@ void computePID() {
 }
 
 /*
-* Function for controlling the left and right motor
-* positive speeds mean forward, negative mean backward rotation
+* Function for controlling the left and right motor using
+* a distance in degrees (°)
+* positive values mean forward, negative mean backward rotation
 *
 */
-void setMotors(float leftSpeed, float rightSpeed){
+void setMotors(float leftDistance, float rightDistance){
+  
+  Serial.println(leftDistance);
+  leftStep.move(leftDistance);
+  rightStep.move(-rightDistance);
 
-  //map the speed values to a more useful range
-  const int RANGE = 255*16;
-  float leftmSpeed = map(leftSpeed, -255, 255, -RANGE, RANGE);
-  float rightmSpeed = map(rightSpeed, -255, 255, -RANGE, RANGE);
+}
 
-  Serial.println(leftmSpeed);
-
-  //inverse the speeds at the second motor,
-  //as its mounted mirrored
-  leftStep.setSpeed(leftmSpeed);
-  rightStep.setSpeed(- rightmSpeed);
-  //leftStep.setSpeed(4000.00);
-  //rightStep.setSpeed(4000.00)
-
-  //run at new set speed
-  leftStep.runSpeed();
-  rightStep.runSpeed();
-
+/*
+* util function that works like map, but for floats instead of integers
+*/
+float floatMap(float x, float in_min, float in_max, float out_min, float out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
