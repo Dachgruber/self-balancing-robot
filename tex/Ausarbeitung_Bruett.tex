@@ -1,0 +1,117 @@
+% https://de.overleaf.com/login
+% https://www.texstudio.org/
+% Dokumentenklasse, Schrift- und Papiergröße
+\documentclass[12pt, a4paper]{scrartcl}
+% scrartcl: Kurze Aufsätze, scrreprt: Längere Arbeiten, scrbook: Buch, scrlttr2: Brief, beamer: Präsentation, 
+
+%--------------------ganz viel Bumms für scrbook-----------------
+\usepackage[
+%	automark,			% Kapitelangaben in Kopfzeile automatisch erstellen
+	headsepline,	% Trennlinie unter Kopfzeile
+	plainheadsepline,
+	ilines				% Trennlinie linksbündig ausrichten
+]{scrlayer-scrpage}
+
+% Kopf- und Fußzeilen ------------------------------------------------------
+\pagestyle{scrheadings}
+
+% Kopf- und Fußzeile auch auf Kapitelanfangsseiten -------------------------
+% \renewcommand*{\chapterpagestyle}{scrheadings}
+
+
+\ihead[\rightmark]{\rightmark} \chead[]{}
+\ohead[\pagemark]{\pagemark} \cfoot[]{}
+
+%\automark{chapter}
+%\automark*[section]{chapter} 
+
+%\renewcommand{\chaptermark}[1]{\markright{\ #1}}
+%\usepackage[Section]{romannum}
+%----------------------------------------------------------------
+
+\usepackage{lmodern}      			% Bessere Schrift in pdf
+\usepackage[utf8]{inputenc}         % Kodierung mit allen ASCII-Zeichen und den gängigsten Sonderzeichen
+\usepackage[T1]{fontenc}  			% Anzeigen von Sonderzeichen und Silbentrennung
+\usepackage[ngerman]{babel}			% Sprachpaket neue deutsche Rechtschreibung
+\usepackage{blindtext}				% Erzeugt Blindtext zum Seitenfüllen
+
+\usepackage{microtype}
+\DisableLigatures[?,!]{encoding=T1} %verhindert umgedrehte Fragezeichen in Zitaten
+
+\usepackage[left=3cm, right=3cm, top=2.5cm, bottom=2.5cm]{geometry} %Seitenabstände
+
+\usepackage[onehalfspacing]{setspace}
+
+\usepackage{caption}    %bessere captions
+
+% Mathe-Pakete
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{nicefrac}				% Schräge Brüche
+\usepackage{cancel}					% Zum Durchstreichen in Formeln
+\usepackage{xparse}					% Wird für das Physik-Paket benötigt
+\usepackage{physics}				% Physik Formeln
+
+\usepackage{graphicx}				% Bilder
+\usepackage{wrapfig}				% Textumflossene Bilder 
+\usepackage{float}					% Besseres setzen von Bilden [H]
+\usepackage[inline]{enumitem}		% Bessere Listen
+\usepackage{tabularx}				% Mehr Optionen für Tabellen
+\usepackage{tabulary}				% Tabellen mit fester Gesamtbreite
+
+\usepackage{booktabs}
+\usepackage{xcolor,colortbl}
+\definecolor{Gray}{gray}{0.85}
+
+\usepackage{siunitx}				% Tabellen mit Zahlen
+
+% Verlinkungen aller Art
+\usepackage[ngerman]{varioref}		% Verlinkungen mit Seite
+\usepackage{hyperref}				% Verlinkungen der Kapitel
+\usepackage[ngerman]{cleveref}		% Verlinkungen mit Art
+
+\usepackage{tcolorbox} %macht lustige Text-Boxen
+
+
+\usepackage{multicol} % gibt Möglichkeit, mehrere Spalten zu machen
+
+
+\usepackage{pdfpages}
+
+%\usepackage{scrlayer-scrpage}
+%\pagestyle{scrheadings}
+
+% Diese Reihenfolge muss zwingend so eingehalten werden!
+
+\usepackage{listings}				% Programmiercode setzen
+% Umlaute im Quellcode
+\lstset{basicstyle=\ttfamily}
+\lstset{literate=%
+	{Ö}{{\"O}}1
+	{Ä}{{\"A}}1
+	{Ü}{{\"U}}1
+	{ß}{{\ss}}1
+	{ü}{{\"u}}1
+	{ä}{{\"a}}1
+	{ö}{{\"o}}1
+}
+
+\usepackage{rotating}
+
+\usepackage{lettrine} % b  i  g  first letter at paragraph
+\begin{document}
+\includepdf{titlepage}
+\tableofcontents
+
+\section{Kurzvorstellung}
+
+
+
+\section{Motivation}
+\section{Details}
+\subsection{Aufbau Schaltung}
+\subsection{Aufbau Software}
+\subsection{Erläuterung der Funktionsweise}
+\section{Ausblick}
+\end{document}

@@ -1,0 +1,102 @@
+% https://de.overleaf.com/login
+% https://www.texstudio.org/
+
+% Dokumentenklasse, Schrift- und Papiergröße
+\documentclass[12pt, a4paper]{scrartcl}
+% scrartcl: Kurze Aufsätze, scrreprt: Längere Arbeiten, scrbook: Buch, scrlttr2: Brief, beamer: Präsentation, ...
+
+\usepackage{lmodern}      			% Bessere Schrift in pdf
+\usepackage[utf8]{inputenc}         % Kodierung mit allen ASCII-Zeichen und den gängigsten Sonderzeichen
+\usepackage[T1]{fontenc}  			% Anzeigen von Sonderzeichen und Silbentrennung
+\usepackage[ngerman]{babel}			% Sprachpaket neue deutsche Rechtschreibung
+\usepackage{blindtext}				% Erzeugt Blindtext zum Seitenfüllen
+
+\usepackage{color}
+
+% Mathe-Pakete
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{nicefrac}				% Schräge Brüche
+\usepackage{cancel}					% Zum Durchstreichen in Formeln
+\usepackage{xparse}					% Wird für das Physik-Paket benötigt
+\usepackage{physics}				% Physik Formeln
+
+\usepackage{graphicx}				% Bilder
+\usepackage{wrapfig}				% Textumflossene Bilder 
+\usepackage{float}					% Besseres setzen von Bilden [H]
+\usepackage{subfig}
+\usepackage[inline]{enumitem}		% Bessere Listen
+\usepackage{tabularx}				% Mehr Optionen für Tabellen
+\usepackage{tabulary}				% Tabellen mit fester Gesamtbreite
+\usepackage{siunitx}				% Tabellen mit Zahlen
+
+% Verlinkungen aller Art
+\usepackage[ngerman]{varioref}		% Verlinkungen mit Seite
+\usepackage{hyperref}				% Verlinkungen der Kapitel
+\usepackage[ngerman]{cleveref}		% Verlinkungen mit Art
+% Diese Reihenfolge muss zwingend so eingehalten werden!
+
+\usepackage{listings}				% Programmiercode setzen
+% Umlaute im Quellcode
+\lstset{basicstyle=\ttfamily}
+\lstset{literate=%
+	{Ö}{{\"O}}1
+	{Ä}{{\"A}}1
+	{Ü}{{\"U}}1
+	{ß}{{\ss}}1
+	{ü}{{\"u}}1
+	{ä}{{\"a}}1
+	{ö}{{\"o}}1
+}
+
+\begin{document}
+
+\begin{titlepage}
+   \begin{center}
+       \vspace*{1cm}
+       
+       \large
+		 Abschluss-Ausarbeitung \\
+		 für das Modul \textbf{Elektronik für Lehrämtler} zu dem Projekt:\\
+		 \vspace{0.5cm}
+		\LARGE
+       \textbf{ARoPra}\\
+        \large
+       \textbf{A}rduino \textbf{Ro}boter mit \textbf{Pr}üfungs\textbf{A}ngst\\
+        \vspace{1.5cm}
+		\large       
+       Ein selbstbalancierender \\ Zweibein-Roboter basierend auf \\der Arduino-Platform
+       
+       \vspace{1.5cm}
+	vorgelegt von \\
+       \textbf{Cornelius Brütt}
+
+       
+       \large   
+       MatNr: 1161780\\
+       Mail: stu231310@mail.uni-kiel.de\\
+            
+       \vspace{0.8cm}
+		\vfill
+
+	\begin{figure}%
+    		\centering
+    		%\subfloat{{\includegraphics[width=5cm]{university_matNat} }}
+    		%\qquad
+    		%\subfloat{{\includegraphics[width=5cm]{img/laborino} }}
+	\end{figure}
+     
+      \large
+      
+   \end{center}
+   \begin{tabular}{ll}
+       Seminarleitung:& Prof. Dr. Dietmar Block\\
+   \end{tabular}\\
+   \\
+       \vspace{1.5cm}
+       \noindent
+       Kiel, am 05. Oktober 2023
+\end{titlepage}
+
+\end{document}
