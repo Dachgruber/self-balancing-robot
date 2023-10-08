@@ -29,7 +29,7 @@ const bool DEBUG = true;
 //#########################################CONFIG/TUNING ZONE###############################################
 
 // params for the steppies
-const int microStepConfiguration = 4 //1 for fullstep, 2 for halfstep, 4 for quarterstep...
+const int microStepConfiguration = 4; //1 for fullstep, 2 for halfstep, 4 for quarterstep...
 const float maxSpeedLimit = 360 * microStepConfiguration;
 const float maxAccelLimit = 8000;
 
@@ -95,8 +95,9 @@ void setup() {
   rightStep.setAcceleration(maxAccelLimit);
 
   Serial.begin(9600);
-  Wire.begin();
-  delay(100); //delay to rule out some issues with Wire being slow
+  //Wire object is included the IMU lib atm
+  //Wire.begin();
+  //delay(100); //delay to rule out some issues with Wire being slow
 
   //mpu setup
   IMU::init();
@@ -262,8 +263,7 @@ void setMotors(float leftDistance, float rightDistance){
 * This adds the gyro and accel angle using a comp filter
 *
 */
-/*
-float addAngle(float gyro, float accel) {
+//float addAngle(float gyro, float accel) {
 
   //calc the current angle depending on the measured data
 
@@ -279,4 +279,4 @@ float addAngle(float gyro, float accel) {
   //addedAngle = alpha * (previousAngle + gyroAngle + sampleTime) + (1-alpha) * (accAngle);
 
   //return addedAngle;
-}
+//}
