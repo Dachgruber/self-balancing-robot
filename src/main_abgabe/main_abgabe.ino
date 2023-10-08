@@ -146,35 +146,26 @@ void loop() {
   //Reads the data from the MPU...
   IMU::read();
 
-   ää//...and processes it with the Kalman Filter
-  theta= IMU::getRoll();
-
-  //some debug print
-  //Serial.println("");
-  //Serial.print(accZ); Serial.print(" "); Serial.print(accY); Serial.print(" "); Serial.println(gyroX);
-  //Serial.println(angleX);
-  //Serial.print(angleX); Serial.print(" "); Serial.print(angleY); Serial.print(" "); Serial.print(angleZ); Serial.println(" ");
+  //...and processes it with the Kalman Filter
+  theta = IMU::getRoll();
 
   //compute the needed motorpower using the PID
-
+  //this sets the global motorPower to a new value
   computePID();
-  
-  if(DEBUG){
-    //Serial.println(motorPower);
-  }
+
+  //and set the Motors using the motorPower variable
   setMotors(motorPower, motorPower);
 
-  //Slowing things down to prevent overflowing debug out
-  //Comment this or the loop will be to slow!
-  //delay(1000); 
 }
 
-/* some register magic taken from instructables
-* LINK: https://www.instructables.com/Arduino-Self-Balancing-Robot-1/
+/* some register magic taken and from instructables and modified to my needs
+*  LINK: https://www.instructables.com/Arduino-Self-Balancing-Robot-1/
 * 
-* This enables the internal Timer1 to wake up the PID routine every 5ms
-
-*  Calculations (for 500ms): 
+*  This enables the internal Timer1 to interrupt the loop routine every 5ms
+*  The time depends on the setting of the prescaler TCCR1B and the Counting 
+*  register OCR1A
+*  
+*  Example Calculations (for 500ms): 
 *  System clock 16 Mhz and Prescalar 256;
 *  Timer 1 speed = 16Mhz/256 = 62.5 Khz    
 *  Pulse time = 1/62.5 Khz =  16us  
@@ -184,7 +175,6 @@ void initISR(){
   cli(); // disable global interrupts
   TCCR1A = 0; //set entire TCCR1A register to 0, resetting the timer value
   TCCR1B = 0; //same for TCCR1B
-
   //set compare match register to set sample time 5ms
   OCR1A = 100;
   //prescale: will divide the clock signal with 8, slightly slowing down our timer
@@ -192,12 +182,16 @@ void initISR(){
   TCCR1B |= B00000010;
   // enable timer compare interrupt
   TIMSK1 |= (1 << OCIE1A);
-  sei(); //enable glonbal interrupts
+  sei(); //enable global interrupts
 
 } 
 
-
-//the ISR will be called every 5ms
+/*
+* The Interrupt Service Routine (ISR) looks like a function
+* that gets called in the specified timing intervall
+*
+* Our ISR will be called every 5ms to execute our run()
+*/
 ISR(TIMER1_COMPA_vect) {
   TCNT1  = 0; //reset the timer 
   // calling run() instead of runSpeed() tells the stepper to
@@ -207,21 +201,71 @@ ISR(TIMER1_COMPA_vect) {
 
 }
 /*
-* we currently do not depend on the ISR but instead call the PID function from the main loop func
-* this is basically a makeshift PID-Controller
-* This controller will do the following steps:
+* computes the new motorPower value using a PID-algorithm 
+* We currently do not depend on the ISR for this call but instead call the PID function 
+* from the main loop func ourselfs. This means that is isnt quite clear how much time
+* lays inbetween calls, which will cause troubles later (foreshadowing)
 *
-*     1. calculate the current angle twice using the accel data and the gyro data individually
-*     2. combine these two angles using a complimentary filer, ruling out drift and noise
-*     3. compute the PID error that specifies, how "bad" the current situation is
-*     4. compute the needed motorPower using the PID algorithm with the magic KP,KI and KD numbers and errors
+* -> motorPower is a global variable because it needs to be when using the ISR
+*
+* This algorithm will do the following steps:
+*
+*     1. take the measured (and filtered!) angle from the mpu
+*     2. compute the PID error that specifies, how "bad" the current situation is
+*     3. compute the Proportional, Integral and Derivative terms of the PID with the magic KP,KI and KD numbers and errors
+*     4. add the terms (and constrain the result!) the to calculate the needed motorPower (no return needed as motorPower is global)
 */
 void computePID() {  
+
+  /*1. take the angle */
+  currentAngle = theta;
+
+  /*2. error calculation*/
+  //calculation of error values for the PID
+  error = currentAngle - targetAngle;
+  errorSum = errorSum + error;
+  errorSum = constrain(errorSum, -300, 300); //damit uns die Geschichte nicht um die Ohren fliegt
+
+  /*3. error calculation*/
+  //calculate output from P, I and D values
+  float pValue,iValue,dValue;
+  pValue = KP * (error);
+  iValue = KI * (errorSum)*sampleTime;
+  dValue = KD * (currentAngle-previousAngle)/sampleTime;
+
+  /*4. final steps*/
+  float output = pValue + iValue - dValue;
+  //a circle has 360 degrees, so constrain to one circle in each direction
+  motorPower = constrain(output, -360, 360); 
+  previousAngle = currentAngle; //save for next time
   
-  /*1. angle calculation*/
+}
+
+/*
+* Function for controlling the left and right motor using a distance in degrees (°)
+* positive values mean forward, negative mean backward rotation
+*
+*/
+void setMotors(float leftDistance, float rightDistance){
+
+  if(DEBUG) {
+    Serial.println(leftDistance);
+  }
+  
+  leftStep.move(leftDistance);
+  rightStep.move(-rightDistance);
+
+}
+
+/*
+* @deprecated
+* This adds the gyro and accel angle using a comp filter
+*
+*/
+/*
+float addAngle(float gyro, float accel) {
 
   //calc the current angle depending on the measured data
-  //we currently use the already measured angle of the GY521 lib
 
   //accAngle = atan2(accY, accZ)*RAD_TO_DEG;
   //gyroRate = map(gyroX, -32768, 32767, -250, 250); //mapping gyroX to int range 2^16 = 65 534
@@ -231,45 +275,8 @@ void computePID() {
   /*2. combination of angles*/
   //combining acc and gyro values using a complementary filter
   //filter acts as a high pass on the gyro and a lowpass on the accel to filter out drift from gyro and noise from accel
+  //float addedAngle = 0.0;
+  //addedAngle = alpha * (previousAngle + gyroAngle + sampleTime) + (1-alpha) * (accAngle);
 
-  //currentAngle = alpha * (previousAngle + gyroAngle + sampleTime) + (1-alpha) * (accAngle);
-  //currentAngle = 0.9934 * (previousAngle + gyroAngle) + 0.0066 * (accAngle);
-
-  //as my comp filter is _really_ bad, use the comp filter from the GY521 lib and use measured angleX
-  currentAngle = angleX;
-  
-
-  /*3. error calculation*/
-  //calculation of error values for the PID
-  error = currentAngle - targetAngle;
-  errorSum = errorSum + error;
-  errorSum = constrain(errorSum, -300, 300); //damit uns die Geschichte nicht um die Ohren fliegt
-
-
-  /*4. finally, PID magic*/
-  //calculate output from P, I and D values
-  float output = KP * (error)+ KI * (errorSum)*sampleTime - KD * (currentAngle-previousAngle)/sampleTime ;
-  motorPower = constrain(output, -360, 360); //a circle has 360 degrees, so constrain to one circle in each direction
-  previousAngle = currentAngle; //save for next time
-
-  //some debug outprint
-  //Serial.print(gyroAngle); Serial.print("  ");
-  //Serial.print(accAngle); Serial.print("  ");
-  //Serial.println(currentAngle);
-  
-}
-
-/*
-* Function for controlling the left and right motor using
-* a distance in degrees (°)
-* positive values mean forward, negative mean backward rotation
-*
-*/
-void setMotors(float leftDistance, float rightDistance){
-  if(DEBUG) {
-    Serial.println(leftDistance);
-  }
-  leftStep.move(leftDistance);
-  rightStep.move(-rightDistance);
-
+  //return addedAngle;
 }
