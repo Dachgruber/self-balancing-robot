@@ -5,15 +5,15 @@
 */
 //=============================================HEAD=======================================================
 //used libraries
-#include "GY521.h"
 #include "math.h" 
 #include <AccelStepper.h>
-
 #include "KalmanMPU6050.h"
-//#include <Stepper.h>
 
 //math constants
 #define earthConst 9.81
+
+//DEBUG MODE enables serial output
+const bool DEBUG = true;
 
 //-----------------------------------------------Pins----------------------------------------------------
 
@@ -25,12 +25,12 @@
 
 #define potiPin A0
 
-
-const bool DEBUG = true;
+//no pins for the MPU as it gets detected on the I2C Bus
 //#########################################CONFIG/TUNING ZONE###############################################
 
 // params for the steppies
-const float maxSpeedLimit = 360 * 4;
+const int microStepConfiguration = 4 //1 for fullstep, 2 for halfstep, 4 for quarterstep...
+const float maxSpeedLimit = 360 * microStepConfiguration;
 const float maxAccelLimit = 8000;
 
 // three dabloons for the three parameters of the P I D
@@ -39,7 +39,7 @@ float KI = 0;   //(I)ntegral Tuning Parameter
 float KD = 0.0; //(D)erivative Tuning Parameter
 
 //this is the angle in degrees the robot should be standing at, measured perpendicular to ground.
-//the bias is used to include the balancing point of the robot frame (determine this using the mpu test) 
+//the bias is used to account for a slanted positioning of the MPU (determine this using the mpu test) 
 float angleBias = -2.8;
 float targetAngle = 0 + angleBias;
 
@@ -48,23 +48,15 @@ float targetAngle = 0 + angleBias;
 
 
 //---------------------------------------------stepper setup----------------------------------------------
-// specs of the used stepper motor.
-// if these differ from the setup, change to the stepper code is needed
-// stepsPerRevolution = 200;
-// stepTime = 1/8;
-
 
 //stepper Objects used in the code
 AccelStepper rightStep(AccelStepper::DRIVER,stepPin2,dirPin2);
 AccelStepper leftStep(AccelStepper::DRIVER,stepPin1,dirPin1);  
 
-
 //working var that specifies the current motorPower
 volatile int motorPower;
 
 //---------------------------------------------sensor setup----------------------------------------------
-//we do not need any pin specification as the MPU gets searched up on the I2C Bus
-
 //working vars for the accelerometer and gyro
 volatile float accY, accZ;
 volatile float accAngle;
