@@ -1,5 +1,6 @@
 ## temp fix to not make the Ausarbeitung public
-.tex
+*.tex
+*.pdf
 
 
 ## Core latex/pdflatex auxiliary files:
