@@ -8,6 +8,8 @@
 #include "GY521.h"
 #include "math.h" 
 #include <AccelStepper.h>
+
+#include "KalmanMPU6050.h"
 //#include <Stepper.h>
 
 //math constants
@@ -29,16 +31,16 @@ const bool DEBUG = true;
 
 // params for the steppies
 const float maxSpeedLimit = 360 * 4;
-const float maxAccelLimit = 6000;
+const float maxAccelLimit = 8000;
 
 // three dabloons for the three parameters of the P I D
-float KP = 10;   //(P)roportional Tuning Parameter
+float KP = 12;   //(P)roportional Tuning Parameter
 float KI = 0;   //(I)ntegral Tuning Parameter 
-float KD = 0; //(D)erivative Tuning Parameter
+float KD = 0.0; //(D)erivative Tuning Parameter
 
 //this is the angle in degrees the robot should be standing at, measured perpendicular to ground.
 //the bias is used to include the balancing point of the robot frame (determine this using the mpu test) 
-float angleBias = -3.8;
+float angleBias = -2.8;
 float targetAngle = 0 + angleBias;
 
 
@@ -74,7 +76,7 @@ volatile float angleX, angleY, angleZ;
 
 //mpu object used in the code
 //0x68 address as AD0 Pin is not connected atm
-GY521 mpu(0x68);
+//GY521 mpu(0x68);
 
 //-----------------------------------------------PID setup----------------------------------------------
 //find KI,KP and KP in the Config Zone (tm)
@@ -114,17 +116,21 @@ void setup() {
   delay(100); //delay to rule out some issues with Wire being slow
 
   //wait for the mpu to be foundon the I2C Bus
-  while(mpu.wakeup() == false) {
-    Serial.print(millis());
-    Serial.println("\tConnection to GY521 failed");
-    delay(1000);
-  }
+  //while(mpu.wakeup() == false) {
+  //  Serial.print(millis());
+  //  Serial.println("\tConnection to GY521 failed");
+  //  delay(1000);
+  //}
   Serial.println("GY521 FOUND IN THE BUS, STARTING PROGRAMM");
   delay(1000);
 
   //mpu setup
-  mpu.setAccelSensitivity(1); //set to 4g
-  mpu.setGyroSensitivity(1); //set to 500dps
+  //mpu.setAccelSensitivity(1); //set to 4g
+  //mpu.setGyroSensitivity(1); //set to 500dps
+
+  IMU::init();
+  IMU::read();
+
 
   //sets the calibration values from the cali sketch
   //mpu.axe = -0.0003540;
@@ -158,11 +164,8 @@ float floatMap(float x, float in_min, float in_max, float out_min, float out_max
 */
 float readPoti(int minV, int maxV) {
   int analogValue = analogRead(potiPin);
-  int finValue = floatMap(analogValue, 0, 1023, minV, maxV);
-  
-  if (DEBUG) {
-    Serial.print("Value: "); Serial.print(finValue); Serial.print(" "); 
-  }
+  float finValue = floatMap(analogValue, 0, 1023, minV, maxV);
+ 
 
   return finValue;
 }
@@ -170,18 +173,30 @@ float readPoti(int minV, int maxV) {
 
 void loop() {
 
-  KP = readPoti(0,100);
+  KP = readPoti(0,60);
 
-  mpu.read(); //get new, fresh values
+   
+  if (DEBUG) {
+    Serial.print("KP: "); Serial.print(KP); Serial.print(" "); 
+    Serial.print("KI: "); Serial.print(KI); Serial.print(" ");
+    Serial.print("KD: "); Serial.print(KD); Serial.print(" ");
+  }
+
+  //mpu.read(); //get new, fresh values
   
+  /* Reads the data from the MPU and processes it with the Kalman Filter */
+  IMU::read();
+
   //then, disect them into their components
-  accZ = mpu.getAccelZ();
-  accY = mpu.getAccelY();
-  gyroX = mpu.getGyroX();
-  angleX = mpu.getAngleX();
+  //accZ = mpu.getAccelZ();
+  //accY = mpu.getAccelY();
+  //gyroX = mpu.getGyroX();
+  //angleX = mpu.getAngleX();
   //angleY = mpu.getAngleY(); //not needed atm
   //angleZ = mpu.getAngleZ();
   
+  angleX = IMU::getRoll();
+
   //some debug print
   //Serial.println("");
   //Serial.print(accZ); Serial.print(" "); Serial.print(accY); Serial.print(" "); Serial.println(gyroX);
@@ -299,7 +314,6 @@ void computePID() {
 *
 */
 void setMotors(float leftDistance, float rightDistance){
-  
   if(DEBUG) {
     Serial.println(leftDistance);
   }
