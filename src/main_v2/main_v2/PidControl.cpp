@@ -1,7 +1,8 @@
 /* Self balancing Robot via Stepper Motor with microstepping and Digital   Motion Processing
     PID Controller
     written by : Rolf Kurth in 2019
-     rolf.kurth@cron-consulting.de
+    rolf.kurth@cron-consulting.de
+    modified by : Cornelius Brütt in 2023
 */
 #include "PidControl.h"
 #include   <Arduino.h>

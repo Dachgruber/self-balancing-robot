@@ -13,8 +13,7 @@ class  Motor
 // ------------------------------------------------------------------------
 
 {  public:
-    Motor(DuePWMmod* ipwm,  int iPinDir, int iPinStep,
-          int  iPinMs1, int iPinMs2, int iPinSleep, char iMotorSide);
+    Motor(int iPinDir, int iPinStep,char iMotorSide); //removed the pwm, sleep and MS1-2 params
 
     volatile bool  DirForward;
 
@@ -26,19 +25,15 @@ class  Motor
     void toggleMode ( );
     float Run(float Steps);
 
-    // Four different  step resolutions: full-step, half-step, 1/4-step, and 1/8-step
-    void MsFull  ( );
-    void MsHalf ( );
-    void MsQuater ( );
-    void MsMicrostep (  );
 
-    int _Ms1, _Ms2, _PinDir, _PinStep, _PinSleep;
+
+    int _PinDir, _PinStep;
     int _Divisor;
     Motor* pMotor;
 
     unsigned long  lastTime;
     char          _MotorSide;
-    DuePWMmod     *ptrpwm;
+    //DuePWMmod     *ptrpwm;
 
 
   private:
