@@ -1,3 +1,8 @@
+## temp fix to not make the Ausarbeitung public
+*.tex
+*.pdf
+
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
