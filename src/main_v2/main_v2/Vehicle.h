@@ -14,15 +14,15 @@ class   Vehicle
 /**********************************************************************/
 {
    public:
-    Vehicle(DuePWMmod* ipwm, Motor * MotorA, Motor * MotorB,
-            PidControl   * PIDContropPIDController, PidControl * PIDContropPIDControllerPos, int iPinSleepSwitch);  // Constructor
+    Vehicle(Motor * MotorA, Motor * MotorB,
+            PidControl   * PIDContropPIDController, PidControl * PIDContropPIDControllerPos);  // Constructor
 
-     Motor *pMotorA;
+    Motor *pMotorA;
     Motor *pMotorB;
     PidControl *pPIDController;
-     PidControl *pPIDControllerPos;
+    PidControl *pPIDControllerPos;
 
-    void Run(MpuYawPitchRoll YawPitchRoll   ,  int &PositionA, int &PositionB, JStickData JStick);
+    void Run(MpuYawPitchRoll YawPitchRoll,  int &PositionA, int &PositionB);
     void init();
 
      void Stop( );
@@ -45,7 +45,7 @@ class   Vehicle
 
 
   protected:
-    DuePWMmod   *ptrpwm;
+    //PWM   *ptrpwm;
     int PinSleepSwitch;
     bool firstRun = true;
 

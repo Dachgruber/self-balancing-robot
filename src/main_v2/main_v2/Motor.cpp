@@ -31,7 +31,7 @@
 #include "Config.h"
 /**********************************************************************/
 //Motor::Motor(DuePWMmod*   ipwm, int iPinDir, int iPinStep,  char iMotorSide )
-Motor::Motor( PWM* ipwm, int iPinDir, int iPinStep,  char iMotorSide )
+Motor::Motor(int iPinDir, int iPinStep,  int iMotorSide )
 /**********************************************************************/
 {
   _PinStep   = iPinStep;
@@ -42,7 +42,7 @@ Motor::Motor( PWM* ipwm, int iPinDir, int iPinStep,  char iMotorSide )
   pinMode(_PinStep,   OUTPUT);
 
   ptr =   (int) this;
-  ptrpwm = ipwm;
+  //ptrpwm = ipwm;
 
   _Divisor = 8; //because we use 1/8 microstepping atm
 }
@@ -93,7 +93,7 @@ float   Motor::Run(float Steps) {
   if (!MotorMode)   {
     RunMode( );
 
-    if (_MotorSide == rechterMotor) {
+    if (_MotorSide == 1) {
       if (Steps   >= 0 ) {
         digitalWrite(_PinDir, LOW);
         DirForward = true ;

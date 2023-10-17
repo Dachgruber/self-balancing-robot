@@ -11,7 +11,7 @@
 #include   "Vehicle.h"
 
 /**********************************************************************/
-Vehicle::Vehicle(PWM*  ipwm, Motor * MotorA, Motor * MotorB,  // Constructor
+Vehicle::Vehicle(Motor * MotorA, Motor * MotorB,  // Constructor
                  PidControl   * PIDController, PidControl * PIDControllerPos)
 /**********************************************************************/
 {
@@ -19,7 +19,7 @@ Vehicle::Vehicle(PWM*  ipwm, Motor * MotorA, Motor * MotorB,  // Constructor
   pMotorB            = MotorB;
   pPIDController      = PIDController;
   pPIDControllerPos   = PIDControllerPos;
-  ptrpwm             = ipwm;
+  //ptrpwm             = ipwm;
   firstRun           = true;
 }
 
@@ -58,11 +58,6 @@ void   Vehicle::Run(MpuYawPitchRoll YawPitchRoll , int &iPositionA, int &iPositi
     pMotorB->RunMode();
     HoldPosition = PositionAB;
   }
-  JStick.Xvalue = JStick.Xvalue - CalJstickX   ;
-  JStick.Yvalue = JStick.Yvalue - CalJstickY;
-
-  DeltaForward = float(JStick.Yvalue)   / 100.0 ;
-  DeltaTurning = float(JStick.Xvalue ) / 4.0;
 
   if (!spinning) {
      if (++skipPos  >= tDelay) { // to delay the calls, Position Control should be 10 times lower than Motor Control
@@ -89,7 +84,7 @@ void   Vehicle::Run(MpuYawPitchRoll YawPitchRoll , int &iPositionA, int &iPositi
 
   uint32_t freqA_abs = abs(StepsA); // only positive Steps
   uint32_t freqB_abs = abs(StepsB);  // direction via PinDir
-  ptrpwm->setFreq2( freqA_abs, freqB_abs);
+  //ptrpwm->setFreq2( freqA_abs, freqB_abs);
 
 }
 
@@ -111,9 +106,6 @@ void   Vehicle::init()
 
   pMotorA->init();
   pMotorB->init();
-
-  pMotorA->MsMicrostep();  // set microstepping
-  pMotorB->MsMicrostep();
 
   pMotorA->SleepMode();
   pMotorB->SleepMode();

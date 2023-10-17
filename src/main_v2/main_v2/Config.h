@@ -7,7 +7,7 @@
 #ifndef   Config_h
 #define  Config_h
 #include "Arduino.h"
-#include "Filter.h"
+//#include "Filter.h"
 
 
 /*   PIN Belegung
@@ -31,6 +31,8 @@
 */
 
 //we do not use any interrupts as we implement a polling strategy
+
+#define LED_PIN = 11;
 
 
 const int  PinDirMotorA  = 3;

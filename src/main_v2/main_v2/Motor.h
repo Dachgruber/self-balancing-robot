@@ -6,14 +6,14 @@
 #define  Motor_h
 #include "Arduino.h"
 #include "PidControl.h"
-#include  "DuePWMmod.h"
+#include  "PWM.h"
 
 // ------------------------------------------------------------------------
 class  Motor
 // ------------------------------------------------------------------------
 
 {  public:
-    Motor(int iPinDir, int iPinStep,char iMotorSide); //removed the pwm, sleep and MS1-2 params
+    Motor(int iPinDir, int iPinStep,int iMotorSide); //removed the pwm, sleep and MS1-2 params
 
     volatile bool  DirForward;
 

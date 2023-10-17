@@ -25,7 +25,7 @@ MPU6050  mpu; // create object mpu
 PidParameter PidParams;
 PidParameterPos PidParamsPos;
 
-PidControl  PidController(PidParams);
+PidControl PidController(PidParams);
 PidControl PidControllerPos(PidParamsPos);
 
 
