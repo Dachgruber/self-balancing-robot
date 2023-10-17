@@ -226,7 +226,6 @@ void loop() {
 
   //computePID();
 
-
   myPID.SetTunings(KP,KI,KD);
   input = angleX;
   myPID.Compute();
