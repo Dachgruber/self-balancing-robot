@@ -10,12 +10,12 @@
 /**********************************************************************/
 PidControl::PidControl   (float iK, float iKp, float iKi, float iKd, float iKa, float iKx)
 /**********************************************************************/
-{   // Constructor 1
+{   // Simple Constructor 1 with direct params association
   K  = iK;
   Kp = iKp;
   Kd = iKd;
   Ki = iKi;
-   Ka = iKa;
+  Ka = iKa;
   Kx = iKx;
   Last_error = 0;
   integrated_error = 0;
@@ -24,27 +24,27 @@ PidControl::PidControl   (float iK, float iKp, float iKi, float iKd, float iKa, 
 /**********************************************************************/
 PidControl::PidControl   (PidParameter Params)
 /**********************************************************************/
-{   // Constructor 2 Motor, different PidParameter
+{   // Constructor 2  for Motors, different PidParameter
   K  = Params.K;
   Kp = Params.Kp;
-   Kd = Params.Kd;
+  Kd = Params.Kd;
   Ki = Params.Ki;
   Ka = Params.Ka;
   Kx = Params.Kx;
-   Last_error = 0;
+  Last_error = 0;
   integrated_error = 0;
   first = true;
 }
 /**********************************************************************/
 PidControl::PidControl   (PidParameterPos Params)
 /**********************************************************************/
-{   // Constructor 3 Distance, different PidParameter
+{   // Constructor 3 for Distance, different PidParameter object type
   K  = Params.K;
-  Kp =   Params.Kp;
+  Kp = Params.Kp;
   Kd = Params.Kd;
   Ki = Params.Ki;
   Ka = Params.Ka;
-  Kx   = Params.Kx;
+  Kx = Params.Kx;
   Last_error = 0;
   integrated_error = 0;
   first = true;
@@ -53,14 +53,14 @@ PidControl::PidControl   (PidParameterPos Params)
 PidControl*   PidControl::getInstance()
 /**********************************************************************/
 {
-   pPID = this;
+  pPID = this;
   return pPID;
 }
 /**********************************************************************/
 void   PidControl::test ()
 /**********************************************************************/
 {
-   Serial.print("PID Test ");
+  Serial.print("PID Test ");
   ptr = (int) this;
   Serial.print("PIDptr   ");
   Serial.println(ptr , HEX);
@@ -77,26 +77,29 @@ float   PidControl::calculate (float iAngle, float isetPoint )
     integrated_error   = 0;
   }
   timeChange = (Now - Last_time)  ;
-  timeChange = timeChange   / 1000.0;  // in millisekunden
+  timeChange = timeChange   / 1000.0;  // in millisec
   error = isetPoint -  iAngle;
 
+  //differential term
   if ( timeChange   != 0) {
     dTerm =  1000.0 * Kd * (error - Last_error) /  timeChange  ;
    }
 
+  //integrative term
   integrated_error = integrated_error  + ( error * timeChange );
    iTerm =   Ki * integrated_error / 1000.0;
 
+  //proportional term
   pTerm =   Kp  * error + ( Ka   * integrated_error ); // modifying Kp
 
-  // Compute PID Output in Steps per   second
+  // Compute PID Output in Steps per second
   eSpeed = K * (pTerm + iTerm + dTerm) ;
 
-  /*Remember something*/
-   Last_time  = Now;
+  //Remember something
+  Last_time  = Now;
   Last_error = error;
 
-  //  digitalWrite(TestPIDtime,   !digitalRead(TestPIDtime)); // Toggle  Pin for reading the Frequenzy
+  // digitalWrite(TestPIDtime,   !digitalRead(TestPIDtime)); // Toggle  Pin for reading the Frequenzy
   // eSpeed   = constrain (eSpeed , -500.0 , 500.0 ); // 10 Steps per Second because Microstep
    
  return eSpeed;  // Steps per Second
@@ -106,7 +109,7 @@ float   PidControl::calculate (float iAngle, float isetPoint )
 void   PidControl::reset ()
 /**********************************************************************/
 {
-   integrated_error = 0.0;
+  integrated_error = 0.0;
   Last_error = 0.0;
 }
 
@@ -116,11 +119,11 @@ void   PidControl::changePIDparams (PidParameter Params)
 // changePIDparams = different   PidParameter !!!!
 /**********************************************************************/
 {
-   K  = Params.K;
+  K  = Params.K;
   Kp = Params.Kp;
   Kd = Params.Kd;
   Ki = Params.Ki;
-   Ka = Params.Ka;
+  Ka = Params.Ka;
   Kx = Params.Kx;
 }
 /**********************************************************************/
@@ -130,7 +133,7 @@ void   PidControl::changePIDparams (PidParameterPos Params)
 {   // different PidParameter !!!!
   K  = Params.K;
   Kp = Params.Kp;
-  Kd   = Params.Kd;
+  Kd = Params.Kd;
   Ki = Params.Ki;
   Ka = Params.Ka;
   Kx = Params.Kx;

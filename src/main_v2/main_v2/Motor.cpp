@@ -9,9 +9,9 @@
   and has a 1.8 step angle (200 steps/revolution). Each phase draws 0.3   A at 12 V,
   allowing for a holding torque of 4.28 kg-cm (0.42Nm)
 
-  Wheel   Durchmesser 88mm = > Distance per Pulse Dpp = d * pi / 200 =  1,3816 mm
-  Distance   per Revolution =  276,32 mm
-  Max 1000 Steps per Second = 5 Revolutions => 13816   mm Distance
+  Wheel diameter d= 70mm => Distance per Pulse Dpp = d * pi / 200 =  1,0996 mm
+  Distance per Revolution =  pi * d = 219.911 mm
+  Max 1000 Steps per Second = 5 Revolutions => 1099.55 mm Distance per Second
 
   Motion Control Modules  Stepper Motor Drivers  A4988 Stepper   Motor Driver Carriers
   https://www.pololu.com/product/1182
@@ -31,7 +31,7 @@
 #include "Config.h"
 /**********************************************************************/
 //Motor::Motor(DuePWMmod*   ipwm, int iPinDir, int iPinStep,  char iMotorSide )
-Motor::Motor( int iPinDir, int iPinStep,  char iMotorSide )
+Motor::Motor( PWM* ipwm, int iPinDir, int iPinStep,  char iMotorSide )
 /**********************************************************************/
 {
   _PinStep   = iPinStep;
@@ -42,6 +42,7 @@ Motor::Motor( int iPinDir, int iPinStep,  char iMotorSide )
   pinMode(_PinStep,   OUTPUT);
 
   ptr =   (int) this;
+  ptrpwm = ipwm;
 
   _Divisor = 8; //because we use 1/8 microstepping atm
 }

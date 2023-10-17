@@ -26,17 +26,17 @@ class   PidControl
       both declarations have different   arguments and obviously different
       definition (implementation).
     */
-     void     changePIDparams(PidParameter Params);
+    void     changePIDparams(PidParameter Params);
     void     changePIDparams(PidParameterPos   Params);
 
     float    calculate (float iAngle, float isetPoint );
-    float     getSteps ();
+    float    getSteps ();
     void     reset ();
     void     test      ( );
-    float     DeltaKp(float iError);
+    float    DeltaKp(float iError);
     float    eSpeed;
     float    pTerm;
-    float     iTerm;
+    float    iTerm;
     float    dTerm;
     float    error;
     float    integrated_error;
@@ -44,20 +44,20 @@ class   PidControl
     float    Last_error;
 
   protected:
-     struct   PidParameter params;
+    struct  PidParameter params;
     float    LastK;
     float    K;
-     float    Ki;
+    float   Ki;
     float    Kd;
     float    Kp;
     float    Ka;
-     float    Kx;
+    float   Kx;
     //   float    Last_angle;
     float    timeChange ;
-     unsigned long Last_time;
+    unsigned long Last_time;
     unsigned long Now;
     int      ptr;
-     PidControl* pPID;
+    PidControl* pPID;
     bool first ;
 };
 
