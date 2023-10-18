@@ -99,7 +99,14 @@ double setpoint, input, output;
 
 //Specify the links and initial tuning parameters
 PID myPID(&input, &output, &setpoint,2,5,1, DIRECT);
+//============================================= TWIDDLE =======================================================
 
+#include "Twiddle.h"
+//const  bool AutoTuning = true;  // sets Twiddle on
+const bool AutoTuning = false;
+
+Twiddle Tuning(3,     KP,    KI,    KD, 0, 0, 0, 0, 0, 
+                    0.005, 0.001, 0.001, 0,0,0,0,0);
 //============================================= BODY =======================================================
 
 void setup() {
@@ -167,6 +174,8 @@ void loop() {
   //KP = readPoti(0,50);
   
   KD = readPoti(0,5);
+
+  if  (AutoTuning)  PIDAutoTuning();  
 
   if (DEBUG) {
     Serial.print("KP:"); Serial.print(KP); Serial.print(" "); 
@@ -304,6 +313,23 @@ void setMotors(float leftDistance, float rightDistance){
   rightStep.move(-rightDistance);
 
 }
+
+void  PIDAutoTuning()  //Twiddle Auto Tuning
+// --------------------------------------------------------------
+{
+  static int skipT = 0;
+  skipT++;
+  if (skipT > 10) {
+    skipT = 11;
+
+    // average = Tuning.next( Robot.PositionAB, PidParams.Kp , PidParams.Ki , PidParams.Kd  ,  PidParams.Ka , PidParamsPos.Kp , PidParamsPos.Ki , PidParamsPos.Kd , PidParamsPos.Ka  );
+
+    average = Tuning.next( (currentAngle), KP  , KI , KD , 0, 0 , 0  , 0 ,  0  );
+
+  }
+}
+
+
 
 /*
 * @deprecated
