@@ -2,6 +2,19 @@
 * This is the main code used for the balancing robot. Flash this to the Arduino Nano Memory
 * 
 * This software will determine the current angle of the robot and will try to correct it to the desiredAngle constant usind the PID controller
+*
+* Used Wheels: d=70mm -> U = pi * d = 220mm
+* Rotation = 200 Steps/rev * MicroStep -> 1000 Steps/rev
+* 
+* MaxSpeed = 1000 Steps/Second = 1 rev/s = 220mm/s
+* 
+* Höhe Schwerpunkt h = 240mm
+* Schräglage theta = 20 degrees
+*
+* Zu korrigierende Länge x = h * sin (theta) = 82.08mm
+*
+* --> Bei einer Schräglage von 20 Grad ist Aropa theoretsch im Stande, die notwendige Länge bei MaxSpeed = 1000 in 0.4s zu überwinden
+*
 */
 //=============================================HEAD=======================================================
 //used libraries
